@@ -1,0 +1,194 @@
+import 'dart:async';
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:auto_size_text/auto_size_text.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+import 'package:wakelock/wakelock.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
+  // This widget is the root of your application.
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'ASG Timer',
+      theme: ThemeData(
+        // This is the theme of your application.
+        //
+        // Try running your application with "flutter run". You'll see the
+        // application has a blue toolbar. Then, without quitting the app, try
+        // changing the primarySwatch below to Colors.green and then invoke
+        // "hot reload" (press "r" in the console where you ran "flutter run",
+        // or simply save your changes to "hot reload" in a Flutter IDE).
+        // Notice that the counter didn't reset back to zero; the application
+        // is not restarted.
+        primarySwatch: Colors.blue,
+      ),
+      home: const MyHomePage(title: 'ASG Timer'),
+    );
+  }
+}
+
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({Key? key, required this.title}) : super(key: key);
+
+  // This widget is the home page of your application. It is stateful, meaning
+  // that it has a State object (defined below) that contains fields that affect
+  // how it looks.
+
+  // This class is the configuration for the state. It holds the values (in this
+  // case the title) provided by the parent (in this case the App widget) and
+  // used by the build method of the State. Fields in a Widget subclass are
+  // always marked "final".
+
+  final String title;
+
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  int? _startTime;
+  int _hours = 0;
+  int _minutes = 0;
+  int _seconds = 0;
+  int _dSeconds = 0;
+  Timer? _timer;
+
+  late FlutterTts flutterTts;
+
+  @override
+  initState() {
+    super.initState();
+    initTts();
+  }
+
+  initTts() async {
+    flutterTts = FlutterTts();
+
+    _setAwaitOptions();
+
+    if (Platform.isAndroid) {
+      _getDefaultEngine();
+    }
+
+    await flutterTts.setLanguage("es-MX");
+    await flutterTts.setVolume(1.0);
+    await flutterTts.setSpeechRate(0.5);
+    await flutterTts.setPitch(1.0);
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  Future _getDefaultEngine() async {
+    var engine = await flutterTts.getDefaultEngine;
+    if (engine != null) {
+      print(engine);
+    }
+  }
+
+  Future _setAwaitOptions() async {
+    await flutterTts.awaitSpeakCompletion(true);
+  }
+
+  void _solveTime() {
+    final startTime = _startTime;
+    if (startTime != null) {
+      var elapsedTime = DateTime.now().millisecondsSinceEpoch - startTime;
+      setState(() {
+        _hours = elapsedTime ~/ 3600000;
+        elapsedTime %= 3600000;
+        _minutes = elapsedTime ~/ 60000;
+        elapsedTime %= 60000;
+        _seconds = elapsedTime ~/ 1000;
+        elapsedTime %= 1000;
+        _dSeconds = elapsedTime ~/ 100;
+      });
+    }
+  }
+
+  String _timeString() {
+    final minutes = _minutes.toString().padLeft(_hours > 0 ? 2 : 1, '0');
+    final seconds = _seconds.toString().padLeft(_hours > 0 || _minutes > 0 ? 2 : 1, '0');
+    var timeString = "";
+
+    if (_hours > 0) {
+      timeString += "$_hours:";
+    }
+    if (_hours > 0 || _minutes > 0) {
+      timeString += "$_minutes:";
+    }
+    return "$timeString$seconds.$_dSeconds";
+  }
+
+  void _speakTime() async {
+    var speech = "";
+
+    if (_hours > 0) {
+      speech += "$_hours hora${_hours == 1 ? "" : "s"},";
+    }
+    if (_hours > 0 || _minutes > 0) {
+      speech += "$_minutes minuto${_minutes == 1 ? "" : "s"} y";
+    }
+
+    speech += "$_seconds punto $_dSeconds segundos";
+
+    await flutterTts.speak(speech);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // This method is rerun every time setState is called, for instance as done
+    // by the _incrementCounter method above.
+    //
+    // The Flutter framework has been optimized to make rerunning build methods
+    // fast, so that you can just rebuild anything that needs updating rather
+    // than having to individually change instances of widgets.
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.blue[800],
+        // Here we take the value from the MyHomePage object that was created by
+        // the App.build method, and use it to set our appbar title.
+        title: Text(widget.title),
+      ),
+      body: GestureDetector(
+        child: SizedBox.expand(
+          // Center is a layout widget. It takes a single child and positions it
+          // in the middle of the parent.
+          child: Container(
+            color: Colors.blue[100],
+            child: Center(
+              child: AutoSizeText(
+                _timeString(),
+                style: const TextStyle(fontFamily: "Courier", fontSize: 200),
+                maxLines: 1,
+              ),
+            ),
+          ),
+        ),
+        onTap: () {
+          if (_startTime == null) {
+            _startTime = DateTime.now().millisecondsSinceEpoch;
+            flutterTts.speak("Inicio");
+            Wakelock.enable();
+            _timer = Timer.periodic(const Duration(milliseconds: 100), (Timer t) => _solveTime());
+          } else {
+            _startTime = null;
+            _timer?.cancel();
+            Wakelock.disable();
+            _speakTime();
+          }
+        },
+      ),
+    );
+  }
+}
