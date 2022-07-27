@@ -127,7 +127,7 @@ class _MyHomePageState extends State<MyHomePage> {
       timeString += "$_hours:";
     }
     if (_hours > 0 || _minutes > 0) {
-      timeString += "$_minutes:";
+      timeString += "$minutes:";
     }
     return "$timeString$seconds.$_dSeconds";
   }
