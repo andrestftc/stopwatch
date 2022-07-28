@@ -243,14 +243,17 @@ class _MyHomePageState extends State<MyHomePage> {
                       _speakTime();
                     }
                   },
-                  child: ListView(
-                    children: [
-                      for (final time in _times)
-                        Text(
-                          time,
-                          style: const TextStyle(fontFamily: "Courier", fontSize: 28),
-                        ),
-                    ],
+                  child: Container(
+                    color: const Color(0xAAFFFFFF),
+                    child: ListView(
+                      children: [
+                        for (final time in _times)
+                          Text(
+                            time,
+                            style: const TextStyle(fontFamily: "Courier", fontSize: 28),
+                          ),
+                      ],
+                    ),
                   ),
                 ),
               ),
