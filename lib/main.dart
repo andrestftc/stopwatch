@@ -196,80 +196,66 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       backgroundColor: Colors.green[100],
       body: SafeArea(
-        child: Stack(
-          children: [
-            Positioned(
-              left: 12.0,
-              bottom: 0.0,
-              child: Column(
-                children: [
-                  for (final time in _times)
-                    Text(
-                      time,
-                      style: const TextStyle(fontFamily: "Courier", fontSize: 28),
-                    ),
-                ],
+        child: Container(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Expanded(
+                child: GestureDetector(onTap: () {
+                  if (_startTime != null) {
+                    setState(() {
+                      _lapStartTime = DateTime.now().millisecondsSinceEpoch;
+                      _times.add("${_timeString()} - ${_lapTimeString()}");
+                    });
+                  }
+                }),
               ),
-            ),
-            Container(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  AutoSizeText(
-                    _timeString(),
-                    style: const TextStyle(fontFamily: "Courier", fontSize: 200),
-                    maxLines: 1,
+              AutoSizeText(
+                _timeString(),
+                style: const TextStyle(fontFamily: "Courier", fontSize: 200),
+                maxLines: 1,
+              ),
+              if (_lapStartTime != null)
+                AutoSizeText(
+                  _lapTimeString(),
+                  style: const TextStyle(fontFamily: "Courier", fontSize: 50, color: Colors.blue),
+                  maxLines: 1,
+                ),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () {
+                    if (_startTime == null) {
+                      _startTime = DateTime.now().millisecondsSinceEpoch;
+                      _lapStartTime = null;
+                      flutterTts.speak("Inicio");
+                      Wakelock.enable();
+                      _timer = Timer.periodic(const Duration(milliseconds: 100), (Timer t) => _solveTime());
+
+                      setState(() {
+                        _times = [];
+                      });
+                    } else {
+                      _startTime = null;
+                      _lapStartTime = null;
+                      _timer?.cancel();
+
+                      Wakelock.disable();
+                      _speakTime();
+                    }
+                  },
+                  child: ListView(
+                    children: [
+                      for (final time in _times)
+                        Text(
+                          time,
+                          style: const TextStyle(fontFamily: "Courier", fontSize: 28),
+                        ),
+                    ],
                   ),
-                  if (_lapStartTime != null)
-                    AutoSizeText(
-                      _lapTimeString(),
-                      style: const TextStyle(fontFamily: "Courier", fontSize: 50, color: Colors.blue),
-                      maxLines: 1,
-                    ),
-                ],
+                ),
               ),
-            ),
-            Positioned(
-              left: 0.0,
-              right: 0.0,
-              top: 0.0,
-              bottom: 300.0, //MediaQuery.of(context).size.height / 2,
-              child: GestureDetector(onTap: () {
-                if (_startTime != null) {
-                  setState(() {
-                    _lapStartTime = DateTime.now().millisecondsSinceEpoch;
-                    _times.add("${_timeString()} - ${_lapTimeString()}");
-                  });
-                }
-              }),
-            ),
-            Positioned(
-              left: 0.0,
-              right: 0.0,
-              top: 300.0,
-              bottom: 0.0, //MediaQuery.of(context).size.height / 2,
-              child: GestureDetector(onTap: () {
-                if (_startTime == null) {
-                  _startTime = DateTime.now().millisecondsSinceEpoch;
-                  _lapStartTime = null;
-                  flutterTts.speak("Inicio");
-                  Wakelock.enable();
-                  _timer = Timer.periodic(const Duration(milliseconds: 100), (Timer t) => _solveTime());
-
-                  setState(() {
-                    _times = [];
-                  });
-                } else {
-                  _startTime = null;
-                  _lapStartTime = null;
-                  _timer?.cancel();
-
-                  Wakelock.disable();
-                  _speakTime();
-                }
-              }),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
