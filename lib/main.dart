@@ -109,8 +109,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _solveTime() {
     final startTime = _startTime;
+    final now = DateTime.now().millisecondsSinceEpoch;
     if (startTime != null) {
-      var elapsedTime = DateTime.now().millisecondsSinceEpoch - startTime;
+      var elapsedTime = now - startTime;
       setState(() {
         _hours = elapsedTime ~/ 3600000;
         elapsedTime %= 3600000;
@@ -120,11 +121,9 @@ class _MyHomePageState extends State<MyHomePage> {
         elapsedTime %= 1000;
         _dSeconds = elapsedTime ~/ 100;
       });
-    }
 
-    final lapStartTime = _lapStartTime;
-    if (lapStartTime != null) {
-      var elapsedTime = DateTime.now().millisecondsSinceEpoch - lapStartTime;
+      final lapStartTime = _lapStartTime ?? startTime;
+      elapsedTime = now - lapStartTime;
       setState(() {
         _lapHours = elapsedTime ~/ 3600000;
         elapsedTime %= 3600000;
