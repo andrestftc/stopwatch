@@ -245,14 +245,12 @@ class _MyHomePageState extends State<MyHomePage> {
                   },
                   child: Container(
                     color: const Color(0xAAFFFFFF),
-                    child: ListView(
-                      children: [
-                        for (final time in _times)
-                          Text(
-                            time,
-                            style: const TextStyle(fontFamily: "Courier", fontSize: 28),
-                          ),
-                      ],
+                    child: ListView.builder(
+                      itemCount: _times.length,
+                      itemBuilder: (context, index) => Text(
+                        "${index + 1}) ${_times[index]}",
+                        style: const TextStyle(fontFamily: "Courier", fontSize: 28),
+                      ),
                     ),
                   ),
                 ),
