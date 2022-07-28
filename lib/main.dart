@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'ASG Timer'),
+      home: const MyHomePage(title: 'Timer'),
     );
   }
 }
