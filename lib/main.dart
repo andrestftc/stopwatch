@@ -198,6 +198,19 @@ class _MyHomePageState extends State<MyHomePage> {
       body: SafeArea(
         child: Stack(
           children: [
+            Positioned(
+              left: 12.0,
+              bottom: 0.0,
+              child: Column(
+                children: [
+                  for (final time in _times)
+                    Text(
+                      time,
+                      style: const TextStyle(fontFamily: "Courier", fontSize: 28),
+                    ),
+                ],
+              ),
+            ),
             Container(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -256,18 +269,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 }
               }),
             ),
-            Positioned(
-                left: 12.0,
-                bottom: 0.0,
-                child: Column(
-                  children: [
-                    for (final time in _times)
-                      Text(
-                        time,
-                        style: const TextStyle(fontFamily: "Courier", fontSize: 28),
-                      ),
-                  ],
-                ))
           ],
         ),
       ),
