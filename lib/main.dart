@@ -200,28 +200,8 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Expanded(
-                child: GestureDetector(onTap: () {
-                  if (_startTime != null) {
-                    setState(() {
-                      _lapStartTime = DateTime.now().millisecondsSinceEpoch;
-                      _times.add("${_timeString()} - ${_lapTimeString()}");
-                    });
-                  }
-                }),
-              ),
-              AutoSizeText(
-                _timeString(),
-                style: const TextStyle(fontFamily: "Courier", fontSize: 200),
-                maxLines: 1,
-              ),
-              if (_lapStartTime != null)
-                AutoSizeText(
-                  _lapTimeString(),
-                  style: const TextStyle(fontFamily: "Courier", fontSize: 50, color: Colors.blue),
-                  maxLines: 1,
-                ),
-              Expanded(
+              Flexible(
+                flex: 2,
                 child: GestureDetector(
                   onTap: () {
                     if (_startTime == null) {
@@ -241,6 +221,35 @@ class _MyHomePageState extends State<MyHomePage> {
 
                       Wakelock.disable();
                       _speakTime();
+                    }
+                  },
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      AutoSizeText(
+                        _timeString(),
+                        style: const TextStyle(fontFamily: "Courier", fontSize: 200),
+                        maxLines: 1,
+                      ),
+                      if (_lapStartTime != null)
+                        AutoSizeText(
+                          _lapTimeString(),
+                          style: const TextStyle(fontFamily: "Courier", fontSize: 50, color: Colors.blue),
+                          maxLines: 1,
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+              Flexible(
+                flex: 1,
+                child: GestureDetector(
+                  onTap: () {
+                    if (_startTime != null) {
+                      setState(() {
+                        _lapStartTime = DateTime.now().millisecondsSinceEpoch;
+                        _times.add("${_timeString()} - ${_lapTimeString()}");
+                      });
                     }
                   },
                   child: Container(
