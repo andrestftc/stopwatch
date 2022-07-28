@@ -54,10 +54,15 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int? _startTime;
+  int? _lapStartTime;
   int _hours = 0;
   int _minutes = 0;
   int _seconds = 0;
   int _dSeconds = 0;
+  int _lapHours = 0;
+  int _lapMinutes = 0;
+  int _lapSeconds = 0;
+  int _lapdSeconds = 0;
   Timer? _timer;
 
   late FlutterTts flutterTts;
@@ -116,6 +121,20 @@ class _MyHomePageState extends State<MyHomePage> {
         _dSeconds = elapsedTime ~/ 100;
       });
     }
+
+    final lapStartTime = _lapStartTime;
+    if (lapStartTime != null) {
+      var elapsedTime = DateTime.now().millisecondsSinceEpoch - lapStartTime;
+      setState(() {
+        _lapHours = elapsedTime ~/ 3600000;
+        elapsedTime %= 3600000;
+        _lapMinutes = elapsedTime ~/ 60000;
+        elapsedTime %= 60000;
+        _lapSeconds = elapsedTime ~/ 1000;
+        elapsedTime %= 1000;
+        _lapdSeconds = elapsedTime ~/ 100;
+      });
+    }
   }
 
   String _timeString() {
@@ -130,6 +149,20 @@ class _MyHomePageState extends State<MyHomePage> {
       timeString += "$minutes:";
     }
     return "$timeString$seconds.$_dSeconds";
+  }
+
+  String _lapTimeString() {
+    final minutes = _lapMinutes.toString().padLeft(_lapHours > 0 ? 2 : 1, '0');
+    final seconds = _lapSeconds.toString().padLeft(_lapHours > 0 || _lapMinutes > 0 ? 2 : 1, '0');
+    var timeString = "";
+
+    if (_lapHours > 0) {
+      timeString += "$_lapHours:";
+    }
+    if (_lapHours > 0 || _lapMinutes > 0) {
+      timeString += "$minutes:";
+    }
+    return "$timeString$seconds.$_lapdSeconds";
   }
 
   void _speakTime() async {
@@ -167,12 +200,21 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Stack(
           children: [
             Container(
-              child: Center(
-                child: AutoSizeText(
-                  _timeString(),
-                  style: const TextStyle(fontFamily: "Courier", fontSize: 200),
-                  maxLines: 1,
-                ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  AutoSizeText(
+                    _timeString(),
+                    style: const TextStyle(fontFamily: "Courier", fontSize: 200),
+                    maxLines: 1,
+                  ),
+                  if (_lapStartTime != null)
+                    AutoSizeText(
+                      _lapTimeString(),
+                      style: const TextStyle(fontFamily: "Courier", fontSize: 50, color: Colors.blue),
+                      maxLines: 1,
+                    ),
+                ],
               ),
             ),
             Positioned(
@@ -183,7 +225,8 @@ class _MyHomePageState extends State<MyHomePage> {
               child: GestureDetector(onTap: () {
                 if (_startTime != null) {
                   setState(() {
-                    _times.add(_timeString());
+                    _lapStartTime = DateTime.now().millisecondsSinceEpoch;
+                    _times.add("${_timeString()} - ${_lapTimeString()}");
                   });
                 }
               }),
@@ -196,6 +239,7 @@ class _MyHomePageState extends State<MyHomePage> {
               child: GestureDetector(onTap: () {
                 if (_startTime == null) {
                   _startTime = DateTime.now().millisecondsSinceEpoch;
+                  _lapStartTime = null;
                   flutterTts.speak("Inicio");
                   Wakelock.enable();
                   _timer = Timer.periodic(const Duration(milliseconds: 100), (Timer t) => _solveTime());
@@ -205,6 +249,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   });
                 } else {
                   _startTime = null;
+                  _lapStartTime = null;
                   _timer?.cancel();
 
                   Wakelock.disable();
