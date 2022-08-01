@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'ASG Timer_',
+      title: 'ASG Timer_.',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
